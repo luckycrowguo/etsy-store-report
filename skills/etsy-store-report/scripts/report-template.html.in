@@ -1,0 +1,118 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Etsy 店铺经营报告</title>
+<style>
+:root{--paper:#f8f5ed;--ink:#1d3330;--muted:#50645e;--accent:#08675d;--line:#d7dfd6;--card:#fffcf5}
+*{box-sizing:border-box}body{margin:0;color:var(--ink);background:var(--paper);font:15px/1.6 "PingFang SC","Microsoft YaHei",sans-serif}
+.wrap{width:min(1120px,calc(100% - 48px));margin:auto}header{background:radial-gradient(ellipse at 90% 10%,#27665b,transparent 65%),#173e39;color:#fff8e6;padding:54px 0 48px;border-bottom:5px solid #d49962}
+.hero-label{color:#cee1d6;font-size:13px;letter-spacing:.12em}h1,h2,.kpis strong{font-family:Georgia,"Songti SC",STSong,serif}
+h1{font-size:clamp(36px,7vw,76px);line-height:1.12;margin:12px 0 18px;letter-spacing:-.035em}h2{font-size:clamp(26px,4vw,38px);line-height:1.2;margin:0 0 17px}h3{font-size:16px;margin:0 0 11px}
+.meta{display:flex;flex-wrap:wrap;gap:6px 20px;color:#d6e7de}.links{display:flex;flex-wrap:wrap;gap:5px 20px;padding:16px 0;border-bottom:1px solid var(--line)}a{color:var(--accent);text-underline-offset:3px}
+main section{padding:36px 0;border-bottom:1px solid var(--line)}.highlights{display:grid;grid-template-columns:repeat(3,1fr);gap:22px}.highlights p{margin:0;border-left:2px solid #c5824d;padding-left:13px}
+.kpis{display:grid;grid-template-columns:repeat(3,1fr);gap:1px;background:var(--line);border:1px solid var(--line);border-radius:10px;overflow:hidden}
+.kpis div{background:var(--card);padding:19px 18px}.kpis span{display:block;color:var(--muted);font-size:13px}.kpis strong{display:block;font-size:clamp(18px,3vw,35px);color:var(--accent);line-height:1.25;margin-top:3px}
+.note{color:var(--muted);font-size:13px;margin:10px 0}.split{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:16px}.chart{background:var(--card);border:1px solid var(--line);padding:16px;border-radius:10px}
+.bars{display:flex;align-items:stretch;gap:3px;height:155px;background:repeating-linear-gradient(to top,transparent 0,transparent calc(25% - 1px),var(--line) calc(25% - 1px),var(--line) 25%);border-bottom:1px solid var(--line)}
+.column{flex:1;display:flex;align-items:flex-end;min-width:0}.column i{width:100%;background:#207f70;border-radius:3px 3px 0 0}.chart:nth-child(2) .column i{background:#a76836}.column:hover i{opacity:.7}.axis{display:flex;justify-content:space-between;color:var(--muted);font-size:11px;margin-top:6px}
+.table-wrap{overflow:auto;background:var(--card);border:1px solid var(--line);border-radius:9px}table{width:100%;border-collapse:collapse;font-variant-numeric:tabular-nums}th,td{padding:9px 13px;border-bottom:1px solid var(--line);text-align:right;white-space:nowrap}th:first-child{text-align:left;white-space:normal;min-width:135px;overflow-wrap:anywhere}thead{background:#e7eee6}tbody th{font-weight:500}tbody tr:last-child>*{border-bottom:none}tbody tr:hover{background:#f0f5ec}
+details{margin-top:9px;background:var(--card);border:1px solid var(--line);border-radius:8px;padding:0 12px}summary{cursor:pointer;padding:10px 0;font-weight:600;color:var(--accent)}details .table-wrap{margin-bottom:10px}footer{padding:22px 0 38px;color:var(--muted);font-size:13px}
+@media(max-width:660px){.wrap{width:calc(100% - 28px)}header{padding:35px 0 29px}.split,.highlights{grid-template-columns:1fr}.highlights{gap:10px}.kpis{grid-template-columns:repeat(2,1fr)}.kpis div{padding:12px 10px}main section{padding:25px 0}.bars{height:115px}}
+.chart:nth-child(3) .column i{background:#50648a}
+.chart-values{margin:0 0 9px;color:var(--muted);font-size:12px;font-variant-numeric:tabular-nums}
+.chart-values p{margin:2px 0;display:flex;flex-wrap:wrap;gap:0 6px}
+.chart-values strong,.chart-values output{color:var(--ink);font-weight:650}
+.column{appearance:none;padding:0;border:0;background:transparent;cursor:pointer}
+.column:focus-visible{outline:2px solid var(--ink);outline-offset:1px;z-index:1}
+.column[data-active] i{outline:2px solid var(--ink);outline-offset:-2px}
+@media(min-width:900px){#trend .split{grid-template-columns:repeat(3,minmax(0,1fr))}}
+.daily-scroll-hint{display:none}
+@media(max-width:660px){
+  .daily-scroll-hint{display:block;margin:0 0 8px}
+  .daily-detail tr>th:first-child{position:sticky;left:0;z-index:1;min-width:110px;white-space:nowrap;box-shadow:1px 0 var(--line)}
+  .daily-detail thead th:first-child{background:#e7eee6}
+  .daily-detail tbody th:first-child{background:var(--card)}
+}
+/* Keep the first screen focused on the period and its headline numbers. */
+body{background:linear-gradient(180deg,#f4eddd 0,transparent 360px),var(--paper)}
+header{padding:32px 0 30px;border-bottom-width:3px}
+h1{font-size:clamp(32px,5vw,56px);margin:6px 0 10px}
+h2{font-size:clamp(25px,3vw,34px);margin:0 0 14px}
+.links{position:sticky;top:0;z-index:5;gap:4px 8px;padding:8px 0;background:var(--paper)}
+.links a{padding:5px 10px;border-radius:5px;text-decoration:none;font-size:13px;font-weight:600}
+.links a:hover,.links a:focus-visible{background:#e4ede5;text-decoration:underline}
+main section{padding:30px 0;scroll-margin-top:60px}
+main section>h2+.note{margin-top:-5px}
+.kpis+.note{margin:12px 0 0;line-height:1.65}
+.kpis div:nth-child(-n+3){background:#e5efe6}
+.kpis div:nth-child(-n+3) strong{font-size:clamp(23px,3.1vw,39px)}
+.kpis strong{font-variant-numeric:tabular-nums}
+.highlights{gap:16px}
+.highlights p{padding:11px 13px;background:var(--card);border-radius:0 7px 7px 0}
+.chart h3{padding-bottom:9px;margin-bottom:8px;border-bottom:1px solid var(--line)}
+tbody tr:nth-child(even){background:#f6f7ee}
+tbody tr:hover{background:#edf4e9}
+summary:hover{color:var(--ink)}
+@media(max-width:660px){
+  header{padding:23px 0 21px}
+  .links{position:static;display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:3px;text-align:center}
+  .links a{padding:7px 2px}
+  main section{padding:24px 0;scroll-margin-top:12px}
+  .kpis div:first-child{grid-column:1/-1}
+  .chart{padding:13px}
+  .highlights{gap:8px}
+  th,td{padding:8px 10px}
+  .daily-detail tbody tr:nth-child(even) th:first-child{background:#f6f7ee}
+}
+</style>
+</head>
+<body>
+<header><div class="wrap"><div class="hero-label">ETSY / 店铺经营报告</div><h1>店铺销售报告</h1>
+<div class="meta">@@store@@<span>@@dates@@</span><span>原币 @@currency@@</span></div></div></header>
+<div class="wrap">
+<nav class="links" aria-label="报告目录"><a href="#overview">销售总览</a><a href="#trend">每日趋势</a><a href="#product">商品与品类</a><a href="#country">市场与邮编</a><a href="#options">下单选项</a><a href="#methods">统计口径</a></nav>
+<main>
+<section id="overview"><h2>销售总览</h2>@@overview@@</section>
+<section><h2>本期发现</h2><div class="highlights">@@highlights@@</div></section>
+<section id="trend"><h2>每日销售趋势</h2><p class="note">按付款日期归属，缺失时使用销售日期。最后一笔订单记录日期为 @@last_day@@。悬停或点按柱子可查看当天数值。</p>@@trend@@</section>
+<section id="product"><h2>商品收入排行</h2><p class="note">商品链接前 10。销售额含各商品分摊的买家净运费收入。</p>@@product@@</section>
+<section><h2>品类客单价</h2><p class="note">根据本次 CSV 的商品信息归类。同一订单跨品类时，分别计入各品类的订单数。</p>@@category@@</section>
+<section id="country"><h2>国家分布</h2>@@country@@</section>
+<section><h2>英国偏远邮编占比</h2><p class="note">分母为英国订单中剔除纯加急服务单后的订单数。按旧面板的邮编区段识别，实际配送范围取决于物流渠道。</p>@@remote@@</section>
+<section><h2>各国热销商品</h2><p class="note">展示销售额排名前 5 的国家，每个国家列出销售额前 5 的商品。</p>@@country_products@@</section>
+<section id="options"><h2>下单选项分布</h2><p class="note">按已识别件数展示前 10 个属性。每个属性显示前 12 个取值，占比以该属性的全部已识别件数为分母。</p>@@options@@</section>
+<section id="methods"><h2>统计口径与数据来源</h2>
+<details><summary>展开口径与核对信息</summary><ul>
+<li>来源为 @@source@@，@@review@@。</li>
+<li>同一订单号只计一单，商品行件数加总。使用付款日，缺失时用销售日。</li>
+<li>销售额＝商品金额减商品折扣，加上买家运费减运费折扣。订单级运费和运费折扣各取第一个非零值。@@conflicts@@</li>
+<li>同单运费按商品折后收入分摊，金额基数为零时按件数分摊。品类客单价以品类去重订单数为分母。</li>
+<li>商品件均价＝折后商品收入 ÷ 商品件数。含运费件均收入的分子还包括买家净运费收入。@@service_note@@</li>
+<li>报告使用 CSV 中的原币 @@currency@@。销售额为 CSV 经营口径，实付运费、退款、平台费用和采购成本需要额外来源。</li>
+<li>选项只统计可识别的结构化字段。遇到姓名、照片或定制字段后停止解析该行后续选项。</li>
+</ul></details></section>
+</main>
+<footer>Etsy 店铺经营报告 · 版式 v1.0</footer></div>
+<script>
+for (const chart of document.querySelectorAll("#trend .chart")) {
+  const readout = chart.querySelector("output");
+  const columns = chart.querySelectorAll(".column");
+  let active = columns[columns.length - 1];
+  active.setAttribute("data-active", "");
+  for (const column of columns) {
+    const showValue = () => {
+      if (active === column) return;
+      active.removeAttribute("data-active");
+      column.setAttribute("data-active", "");
+      readout.textContent = column.getAttribute("aria-label");
+      active = column;
+    };
+    column.addEventListener("pointerenter", showValue);
+    column.addEventListener("focus", showValue);
+    column.addEventListener("click", showValue);
+  }
+}
+</script>
+</body></html>
