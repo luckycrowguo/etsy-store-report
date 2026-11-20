@@ -81,11 +81,12 @@ class Metrics:
         self.shipping += shipping
 
 
-def table(headers, rows):
+def table(headers, rows, row_details=None):
     header = "".join(f"<th scope='col'>{escape(str(h))}</th>" for h in headers)
     body = "".join("<tr>" + "".join(
-        f"<{'th scope=row' if i == 0 else 'td'}>{escape(str(v))}</{'th' if i == 0 else 'td'}>"
-        for i, v in enumerate(row)) + "</tr>" for row in rows)
+        f"<{'th scope=row' if i == 0 else 'td'}>{escape(str(v))}"
+        f"{row_details[index] if i == 0 and row_details is not None else ''}</{'th' if i == 0 else 'td'}>"
+        for i, v in enumerate(row)) + "</tr>" for index, row in enumerate(rows))
     return f"<div class='table-wrap' tabindex='0'><table><thead><tr>{header}</tr></thead><tbody>{body}</tbody></table></div>"
 
 
@@ -99,6 +100,26 @@ def percent(x, y):
 
 def ranked(mapping):
     return sorted(mapping.items(), key=lambda pair: (-pair[1].revenue, pair[0]))
+
+
+def listing_country_bars(listing, order_count, country_products):
+    counts = [(country, len(products[listing].orders))
+              for country, products in country_products.items()
+              if country != "未填写" and listing in products]
+    rows = []
+    for country, count in sorted(counts, key=lambda pair: (-pair[1], pair[0]))[:3]:
+        share = 100 * ratio(count, order_count)
+        rows.append(
+            f'<div class="country-bar"><div><span>{escape(country)}</span>'
+            f'<span>{count:,} 单 · {share:.1f}%</span></div>'
+            f'<div class="country-track" aria-hidden="true"><i style="width:{share:.6f}%"></i></div></div>'
+        )
+    return (
+        (f'<small class="listing-id">Listing ID {listing[1]}</small>' if listing[1].isascii() and listing[1].isdigit() else "")
+        + '<details class="listing-markets"><summary>购买国家分布</summary>'
+        + ("".join(rows) if rows else '<p class="note">暂无收货国家记录。</p>')
+        + '</details>'
+    )
 
 
 def bars(daily, fmt, field):
@@ -148,6 +169,7 @@ def build(source, store, classification):
     services = Metrics()
     daily, markets, listings, skus, categories = (defaultdict(Metrics) for _ in range(5))
     country_products = defaultdict(lambda: defaultdict(Metrics))
+    listing_titles = {}
     region, remote_prefixes = Counter(), Counter()
     option_qty, combo_qty, combo_orders = defaultdict(Counter), Counter(), defaultdict(set)
     shipping_conflicts = 0
@@ -178,7 +200,8 @@ def build(source, store, classification):
             remaining -= allocated
             (services if is_service[i] else merchandise).add(oid, qty[i], net[i], allocated)
             title = row["Item Name"].strip().split(",", 1)[0]
-            listing = (title, row["Listing ID"].strip() or row["Item Name"].strip())
+            listing_id = row["Listing ID"].strip() or row["Item Name"].strip()
+            listing = (listing_titles.setdefault(listing_id, title), listing_id)
             sku = row["SKU"].strip() or "无 SKU"
             category = categories_by_listing.get(listing[1], "未归类")
             for m in (listings[listing], skus[sku], categories[category],
@@ -233,7 +256,10 @@ def build(source, store, classification):
         return [(label[0] if isinstance(label, tuple) else label, m.qty, len(m.orders), fmt(m.revenue),
                  fmt(ratio(m.item,m.qty))) for label,m in entries]
     product_headers = ["商品","件数","订单","销售额","商品件均价"]
-    sections["product"] = table(product_headers, product_rows(ranked(listings)[:10])) + (
+    top_listings = ranked(listings)[:10]
+    market_details = [listing_country_bars(key, len(m.orders), country_products)
+                      for key, m in top_listings]
+    sections["product"] = table(product_headers, product_rows(top_listings), market_details) + (
         "<details><summary>查看 SKU 收入排行 · 前 20</summary>" +
         table(["SKU", *product_headers[1:]], product_rows(ranked(skus)[:20])) + "</details>")
     sections["category"] = table(["品类","订单","件数","销售额","品类客单价"], [

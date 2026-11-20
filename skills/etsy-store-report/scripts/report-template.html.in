@@ -66,6 +66,13 @@ summary:hover{color:var(--ink)}
   th,td{padding:8px 10px}
   .daily-detail tbody tr:nth-child(even) th:first-child{background:#f6f7ee}
 }
+.listing-id{display:block;color:var(--muted);font-size:11px}
+.listing-markets{padding:0;border:0;background:transparent}
+.listing-markets summary{padding:3px 0;font-size:12px}
+.country-bar{max-width:300px;margin:8px 0}
+.country-bar>div:first-child{display:flex;flex-wrap:wrap;justify-content:space-between;gap:0 8px;font-size:12px}
+.country-track{height:6px;background:#e0e8df;border-radius:6px}
+.country-track i{display:block;height:100%;background:var(--accent);border-radius:inherit}
 </style>
 </head>
 <body>
@@ -77,7 +84,7 @@ summary:hover{color:var(--ink)}
 <section id="overview"><h2>销售总览</h2>@@overview@@</section>
 <section><h2>本期发现</h2><div class="highlights">@@highlights@@</div></section>
 <section id="trend"><h2>每日销售趋势</h2><p class="note">按付款日期归属，缺失时使用销售日期。最后一笔订单记录日期为 @@last_day@@。悬停或点按柱子可查看当天数值。</p>@@trend@@</section>
-<section id="product"><h2>商品收入排行</h2><p class="note">商品链接前 10。销售额含各商品分摊的买家净运费收入。</p>@@product@@</section>
+<section id="product"><h2>商品收入排行</h2><p class="note">商品链接前 10。销售额含分摊的买家净运费。展开商品可查看订单数前 3 的收货国家，占比按该链接全部订单计算。</p>@@product@@</section>
 <section><h2>品类客单价</h2><p class="note">根据本次 CSV 的商品信息归类。同一订单跨品类时，分别计入各品类的订单数。</p>@@category@@</section>
 <section id="country"><h2>国家分布</h2>@@country@@</section>
 <section><h2>英国偏远邮编占比</h2><p class="note">分母为英国订单中剔除纯加急服务单后的订单数。按旧面板的邮编区段识别，实际配送范围取决于物流渠道。</p>@@remote@@</section>
