@@ -4,7 +4,7 @@
 
 ## 首次使用
 
-确认自己的 GitHub 账号可以访问本仓库，并且 Codex 运行环境能使用有读取权限的 GitHub 凭据。然后在 Codex 发送：
+本仓库公开可读。首次使用时，在 Codex 发送：
 
 > `$skill-installer` 请安装这个 Skill：https://github.com/luckycrowguo/etsy-store-report/tree/main/skills/etsy-store-report
 
